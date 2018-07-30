@@ -3,14 +3,15 @@
 /**
  * @package   yii2-dynagrid
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2018
- * @version   1.4.8
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2017
+ * @version   1.4.5
  */
 
 namespace kartik\dynagrid;
 
-use kartik\grid\GridView;
 use Yii;
+use kartik\base\Config;
+use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -87,11 +88,10 @@ class Module extends \kartik\base\Module
     public $settingsView = 'settings';
 
     /**
-     * @var mixed the action URL for displaying the dynagrid detail configuration settings on the dynagrid detail
-     * settings form. If this is not set it will default to `<moduleId>/settings/get-config`, where `<moduleId>` is
-     * the module identifier for the dynagrid module.
+     * @var mixed the action URL for displaying the dynagrid detail configuration settings
+     * on the dynagrid detail settings form
      */
-    public $settingsConfigAction;
+    public $settingsConfigAction = '/dynagrid/settings/get-config';
 
     /**
      * @var array the theme configuration for the gridview
@@ -102,7 +102,7 @@ class Module extends \kartik\base\Module
             'bordered' => false,
             'striped' => false,
             'hover' => true,
-            'layout' => self::LAYOUT_1,
+            'layout' => self::LAYOUT_1
         ],
         'simple-bordered' => ['panel' => false, 'striped' => false, 'hover' => true, 'layout' => self::LAYOUT_1],
         'simple-condensed' => [
@@ -110,7 +110,7 @@ class Module extends \kartik\base\Module
             'striped' => false,
             'condensed' => true,
             'hover' => true,
-            'layout' => self::LAYOUT_1,
+            'layout' => self::LAYOUT_1
         ],
         'simple-striped' => ['panel' => false, 'layout' => self::LAYOUT_1],
         'panel-default' => ['panel' => ['type' => GridView::TYPE_DEFAULT, 'before' => self::LAYOUT_2]],
@@ -142,22 +142,40 @@ class Module extends \kartik\base\Module
     public $maxPageSize = 50;
 
     /**
-     * @var string a random salt that will be used to generate a hash signature for tree configuration.
+     * @var mixed the action (url) used for creating a filter or sort setting
      */
-    public $configEncryptSalt = 'SET_A_SALT_FOR_YII2_DYNAGRID';
+    public $createAction = '/dynagrid/settings/create';
 
     /**
-     * @inheritdoc
+     * @var mixed the action (url) used for creating a filter or sort setting
      */
-    protected $_msgCat = 'kvdynagrid';
+    public $updateAction = '/dynagrid/settings/update';
+
+    /**
+     * @var mixed the action (url) used for deleting a filter or sort setting
+     */
+    public $deleteAction = '/dynagrid/settings/delete';
 
     /**
      * @inheritdoc
      */
     public function init()
     {
+        $this->_msgCat = 'kvdynagrid';
         parent::init();
         $this->initSettings();
+    }
+
+    /**
+     * Gets the module instance
+     *
+     * @param string $module the module name
+     *
+     * @return Module
+     */
+    public static function fetchModule($module = self::MODULE)
+    {
+        return Config::getModule($module);
     }
 
     /**
@@ -166,41 +184,38 @@ class Module extends \kartik\base\Module
     public function initSettings()
     {
         $this->dbSettings += [
-            'connection' => 'db',
             'tableName' => 'tbl_dynagrid',
             'idAttr' => 'id',
             'filterAttr' => 'filter_id',
             'sortAttr' => 'sort_id',
-            'dataAttr' => 'data',
+            'dataAttr' => 'data'
         ];
         $this->dbSettingsDtl += [
-            'connection' => 'db',
             'tableName' => 'tbl_dynagrid_dtl',
             'idAttr' => 'id',
             'categoryAttr' => 'category',
             'nameAttr' => 'name',
             'dataAttr' => 'data',
-            'dynaGridIdAttr' => 'dynagrid_id',
+            'dynaGridIdAttr' => 'dynagrid_id'
         ];
         $this->cookieSettings += [
             'httpOnly' => true,
             'expire' => time() + self::COOKIE_EXPIRY,
         ];
-        $this->dynaGridOptions = ArrayHelper::merge(
-            [
-                'storage' => DynaGrid::TYPE_SESSION,
-                'gridOptions' => [],
-                'matchPanelStyle' => true,
-                'toggleButtonGrid' => [],
-                'options' => [],
-                'sortableOptions' => [],
-                'userSpecific' => true,
-                'columns' => [],
-                'submitMessage' => Yii::t('kvdynagrid', 'Saving and applying configuration') . ' &hellip;',
-                'deleteMessage' => Yii::t('kvdynagrid', 'Trashing all personalizations') . ' &hellip;',
-                'deleteConfirmation' => Yii::t('kvdynagrid', 'Are you sure you want to delete the setting?'),
-                'messageOptions' => [],
-            ], $this->dynaGridOptions
-        );
+        $this->dynaGridOptions = ArrayHelper::merge([
+            'storage' => DynaGrid::TYPE_SESSION,
+            'gridOptions' => [],
+            'matchPanelStyle' => true,
+            'toggleButtonGrid' => [],
+            'options' => [],
+            'sortableOptions' => [],
+            'userSpecific' => true,
+            'columns' => [],
+            'submitMessage' => Yii::t('kvdynagrid', 'Saving and applying configuration') . ' &hellip;',
+            'deleteMessage' => Yii::t('kvdynagrid', 'Trashing all personalizations') . ' &hellip;',
+            'deleteConfirmation' => Yii::t('kvdynagrid', 'Are you sure you want to delete the setting?'),
+            'messageOptions' => [],
+        ], $this->dynaGridOptions);
+
     }
 }

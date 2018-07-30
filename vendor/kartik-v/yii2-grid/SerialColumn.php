@@ -3,8 +3,8 @@
 /**
  * @package   yii2-grid
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2014 - 2017
- * @version   3.1.7
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2014 - 2018
+ * @version   3.1.8
  */
 
 namespace kartik\grid;
@@ -143,6 +143,22 @@ class SerialColumn extends YiiSerialColumn
      * @see http://cosicimiento.blogspot.in/2008/11/styling-excel-cells-with-mso-number.html
      */
     public $xlFormat;
+
+    /**
+     * @var array|Closure configuration for the `\kartik\export\ExportMenu` column cell style that will be utilized by
+     * `\PhpOffice\PhpSpreadsheet\Style\Style::applyFromArray()`. This is applicable when configuring this column
+     * in `\kartik\export\ExportMenu`. If setup as a Closure, the signature of the function should be: `function
+     * ($model, $key, $index, $column)`, where `$model`, `$key`, and `$index` refer to the model, key and index of
+     * the row currently being rendered, and `$column` is a reference to the [[DataColumn]] object.
+     */
+    public $exportMenuStyle = ['alignment'=>['vertical' => GridView::ALIGN_CENTER]];
+
+    /**
+     * @var array configuration for the `\kartik\export\ExportMenu` column header cell style that will be utilized by
+     * `\PhpOffice\PhpSpreadsheet\Style\Style::applyFromArray()`. This is applicable when configuring this column
+     * in `\kartik\export\ExportMenu`.
+     */
+    public $exportMenuHeaderStyle = ['alignment'=>['vertical' => GridView::ALIGN_CENTER]];
 
     /**
      * @var array collection of row data for the column for the current page

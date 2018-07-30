@@ -32,7 +32,7 @@ use yii\web\View;
  */
 trait WidgetTrait
 {
-    //public $hashVarLoadPosition = View::POS_HEAD;
+    public $hashVarLoadPosition = View::POS_HEAD;
     /**
      * Sets a HTML5 data variable.
      *

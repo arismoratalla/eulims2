@@ -3,16 +3,16 @@
 /**
  * @package   yii2-dynagrid
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2018
- * @version   1.4.8
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2017
+ * @version   1.4.5
  */
 
 namespace kartik\dynagrid\controllers;
 
-use kartik\dynagrid\models\DynaGridSettings;
 use Yii;
 use yii\web\Controller;
 use yii\web\Response;
+use kartik\dynagrid\models\DynaGridSettings;
 
 /**
  * SettingsController will manage the actions for dynagrid settings
@@ -24,21 +24,15 @@ class SettingsController extends Controller
     /**
      * Fetch dynagrid setting configuration
      *
-     * @return mixed
+     * @return string
      */
     public function actionGetConfig()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $model = new DynaGridSettings();
         $out = ['status' => '', 'content' => ''];
-        $request = Yii::$app->request;
-        if ($model->load($request->post()) && $model->validate()) {
-            $validate = $model->validateSignature($request->post('configHashData', ''));
-            if ($validate === true) {
-                $out = ['status' => 'success', 'content' => var_export($model->getDataConfig(), true)];
-            } else {
-                $out = ['status' => 'error', 'content' => '<div class="alert alert-danger">' . $validate . '</div>'];
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $out = ['status' => 'success', 'content' => print_r($model->getDataConfig(), true)];
         }
         return $out;
     }

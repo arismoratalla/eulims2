@@ -1,11 +1,13 @@
 /*!
  * @package   yii2-dynagrid
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2018
- * @version   1.4.8
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2017
+ * @version   1.4.5
  *
  * Styling for yii2-dynagrid.
- *
+ * 
+ * Author: Kartik Visweswaran
+ * Copyright: 2015, Kartik Visweswaran, Krajee.com
  * For more JQuery plugins visit http://plugins.krajee.com
  * For more Yii related demos visit http://demos.krajee.com
  */
@@ -40,7 +42,8 @@
 .dynagrid-settings-text ul {
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 8px 8px 8px 24px;
+    padding: 8px;
+    padding-left: 24px;
     list-style-type: square;
 }
 

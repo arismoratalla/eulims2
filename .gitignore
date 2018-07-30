@@ -7,6 +7,7 @@ themes/classic/views/
 #vendor/kartik-v/yii2-datecontrol/
 vendor/kartik-v/yii2-datecontrol/
 vendor/kartik-v/yii2-widget-datepicker/
+vendor/kartik-v/
 nbproject/private/private.xml
 nbproject/private/private.xml
 backend/web/images/Thumbs.db

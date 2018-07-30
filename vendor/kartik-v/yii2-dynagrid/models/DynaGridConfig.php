@@ -3,16 +3,16 @@
 /**
  * @package   yii2-dynagrid
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2018
- * @version   1.4.8
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2017
+ * @version   1.4.5
  */
 
 namespace kartik\dynagrid\models;
 
-use kartik\base\Config;
-use kartik\dynagrid\Module;
 use Yii;
 use yii\base\Model;
+use kartik\base\Config;
+use kartik\dynagrid\Module;
 
 /**
  * Model for the dynagrid configuration
@@ -22,13 +22,6 @@ use yii\base\Model;
  */
 class DynaGridConfig extends Model
 {
-    /**
-     * @var string the module identifier if this object is part of a module. If not set, the module identifier will
-     * be auto derived based on the \yii\base\Module::getInstance method. This can be useful, if you are setting
-     * multiple module identifiers for the same module in your Yii configuration file. To specify children or grand
-     * children modules you can specify the module identifiers relative to the parent module (e.g. `admin/content`).
-     */
-    public $moduleId;
     /**
      * @var string the dynagrid widget identifier
      */
@@ -60,7 +53,7 @@ class DynaGridConfig extends Model
     /**
      * @var integer the grid page size
      */
-    public $pageSize = null;
+    public $pageSize;
     /**
      * @var string the filter identifier
      */
@@ -76,7 +69,7 @@ class DynaGridConfig extends Model
     /**
      * @var string the currently selected grid theme
      */
-    public $theme = null;
+    public $theme;
 
     /**
      * @inheritdoc
@@ -86,10 +79,10 @@ class DynaGridConfig extends Model
         /**
          * @var Module $module
          */
-        $module = Config::getModule($this->moduleId, Module::classname());
+        $module = Config::initModule(Module::classname());
         return [
             [['id', 'hiddenColumns', 'visibleColumns', 'pageSize', 'filterId', 'sortId', 'theme'], 'safe'],
-            ['theme', 'required'],
+            [['pageSize', 'theme'], 'required'],
             ['pageSize', 'integer', 'min' => $module->minPageSize, 'max' => $module->maxPageSize],
             ['pageSize', 'default', 'value' => $module->defaultPageSize],
             ['theme', 'default', 'value' => $module->defaultTheme],

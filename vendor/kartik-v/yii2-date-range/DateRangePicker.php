@@ -1,9 +1,9 @@
 <?php
 
 /**
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2018
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2017
  * @package yii2-date-range
- * @version 1.6.9
+ * @version 1.6.8
  */
 
 namespace kartik\daterange;
@@ -118,11 +118,6 @@ class DateRangePicker extends InputWidget
         </div>
         {input}
 HTML;
-
-    /**
-     * @var boolean whether to HTML encode the value
-     */
-    public $encodeValue = true;
 
     /**
      * HTML attributes for the `span` element that displays the default value for a preset dropdown. By default for a
@@ -332,9 +327,6 @@ JS;
         $this->_format = ArrayHelper::getValue($locale, 'format', 'YYYY-MM-DD');
         $this->_separator = ArrayHelper::getValue($locale, 'separator', ' - ');
         if (!empty($this->value)) {
-            if ($this->encodeValue) {
-                $this->value = Html::encode($this->value);
-            }
             $dates = explode($this->_separator, $this->value);
             if (count($dates) > 1) {
                 $this->pluginOptions['startDate'] = $dates[0];
@@ -342,17 +334,16 @@ JS;
                 $this->initRangeValue('start', $dates[0]);
                 $this->initRangeValue('end', $dates[1]);
             }
-            if ($this->startAttribute && $this->endAttribute) {
-                $start = $this->getRangeValue('start');
-                $end = $this->getRangeValue('end');
-                $this->value = $start . $this->_separator . $end;
-                if ($this->hasModel()) {
-                    $attr = $this->attribute;
-                    $this->model->$attr = $this->value;
-                }
-                $this->pluginOptions['startDate'] = $start;
-                $this->pluginOptions['endDate'] = $end;
+        } elseif ($this->startAttribute && $this->endAttribute) {
+            $start = $this->getRangeValue('start');
+            $end = $this->getRangeValue('end');
+            $this->value = $start . $this->_separator . $end;
+            if ($this->hasModel()) {
+                $attr = $this->attribute;
+                $this->model->$attr = $this->value;
             }
+            $this->pluginOptions['startDate'] = $start;
+            $this->pluginOptions['endDate'] = $end;
         }
         $value = empty($this->value) ? '' : $this->value;
         $this->containerTemplate = str_replace('{value}', $value, $this->containerTemplate);
@@ -410,7 +401,7 @@ JS;
         $m = 'moment()';
         if ($this->presetDropdown) {
             $this->initRangeExpr = $this->hideInput = true;
-            $this->pluginOptions['opens'] = ArrayHelper::getValue($this->pluginOptions, 'opens', 'left');
+            $this->pluginOptions['opens'] = 'left';
             $this->pluginOptions['ranges'] = [
                 Yii::t('kvdrp', 'Today') => ["{$m}.startOf('day')", $m],
                 Yii::t('kvdrp', 'Yesterday') => [

@@ -3,8 +3,8 @@
 /**
  * @package   yii2-grid
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2014 - 2017
- * @version   3.1.7
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2014 - 2018
+ * @version   3.1.8
  */
 
 namespace kartik\grid;
@@ -42,7 +42,7 @@ use yii\helpers\Json;
  * @property string          $_clientScript
  * @property GridView        $grid
  * @property string          $format
- * @method getDataCellValue() getDataCellValue($model, $key, $index)
+ * @method getDataCellValue($model, $key, $index)
  * @method renderCell()
  *
  * @author Kartik Visweswaran <kartikv2@gmail.com>

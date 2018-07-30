@@ -1,6 +1,33 @@
 Change Log: `yii2-grid`
 =======================
 
+## Version 3.1.8 (_under development_)
+
+**Date:** _work in progress_
+
+- (enh #795): Update `floatTHead` plugin to latest version.
+- (enh #793): Update Farsi Translations.
+- (bug #791): Correct PHP Doc for `getDataCellValue` method in `ColumnTrait`.
+- (enh #789): Correct `resizeableColumns` plugin init with `floatThead`.
+- (enh #787): Correct grid group summary decimal formatting for whole numbers.
+- (enh #786): Correct docs for grid group footer/header `customCallback`.
+- (enh #781): Add deprecated support for `ActionColumnAsset`.
+- (enh #770, #771): Add grid filter support for the Krajee NumberControl.
+- (enh #767): Add capability to format ExportMenu spreadsheet cells.
+- Update copyright year to current.
+- (enh #766): Correct export for EditableColumn when `asPopover = false`.
+- (enh #760): Use request `getQueryParam` instead of `$_GET`.
+- (enh #756): Correct default CSS class for `toolbarContainer`.
+- (bug #755): Correct grid group summary row to consider `hiddenFromExport` and `hidden` properties.
+- (enh #754): Enhance group summary number formatting for integers.
+- (bug #752): Correct string position validation for layout tokens.
+- (enh #747): Remove unnecessary variable declaration `$grid`.
+- (enh #746): Enhance to allow configurable toolbar container.
+- (enh #739): Update Portuguese Brazilian Translations.
+- (enh #733): More correct `jQuery` usage.
+- (bug #730): Fix comma errors in message files.
+- (enh #729): Update Polish Translations.
+
 ## Version 3.1.7
 
 **Date:** 23-Nov-2017

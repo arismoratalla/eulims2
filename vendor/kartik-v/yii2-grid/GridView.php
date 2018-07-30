@@ -3,8 +3,8 @@
 /**
  * @package   yii2-grid
  * @author    Kartik Visweswaran <kartikv2@gmail.com>
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2014 - 2017
- * @version   3.1.7
+ * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2014 - 2018
+ * @version   3.1.8
  */
 
 namespace kartik\grid;
@@ -21,6 +21,7 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\web\JsExpression;
+use yii\web\Request;
 use yii\web\View;
 use yii\widgets\Pjax;
 
@@ -205,6 +206,10 @@ class GridView extends YiiGridView
      */
     const FILTER_MONEY = '\kartik\money\MaskMoney';
     /**
+     * Grid filter input type for [[\kartik\number\NumberControl]] widget
+     */
+    const FILTER_NUMBER = '\kartik\number\NumberControl';
+    /**
      * Grid filter input type for [[\kartik\checkbox\CheckboxX]] widget
      */
     const FILTER_CHECKBOX_X = '\kartik\checkbox\CheckboxX';
@@ -295,6 +300,7 @@ class GridView extends YiiGridView
      * - `{pager}`: the pager. See [[renderPager()]].
      * - `{export}`: the grid export button menu. See [[renderExport()]].
      * - `{toolbar}`: the grid panel toolbar. See [[renderToolbar()]].
+     * - `{toolbarContainer}`: the toolbar container. See [[renderToolbarContainer()]].
      *
      * In addition to the above tokens, refer the [[panelTemplate]] property for other tokens supported as
      * part of the bootstrap styled panel.
@@ -310,21 +316,21 @@ class GridView extends YiiGridView
 
     /**
      * @var string the default label shown for each record in the grid (plural). This label will replace the plural word
-     * `items` within the grid summary text. 
+     * `items` within the grid summary text.
      */
     public $itemLabelPlural;
 
     /**
-     * @var string the default label shown for each record in the grid (plural). Similar to [[itemLabelPlural]] but 
+     * @var string the default label shown for each record in the grid (plural). Similar to [[itemLabelPlural]] but
      * this is applicable for languages like russian, where the plural label can be different for fewer item count.
-     * This label will replace the plural word `items-few` within the grid summary text. 
+     * This label will replace the plural word `items-few` within the grid summary text.
      */
     public $itemLabelFew;
 
     /**
-     * @var string the default label shown for each record in the grid (plural). Similar to [[itemLabelPlural]] but 
+     * @var string the default label shown for each record in the grid (plural). Similar to [[itemLabelPlural]] but
      * this is applicable for languages like russian, where the plural label can be different for many item count.
-     * This label will replace the plural word `items-many` within the grid summary text. 
+     * This label will replace the plural word `items-many` within the grid summary text.
      */
     public $itemLabelMany;
 
@@ -341,6 +347,7 @@ class GridView extends YiiGridView
      * - `{summary}`: _string_, which will render the grid results summary.
      * - `{pager}`: _string_, which will render the grid pagination links.
      * - `{toolbar}`: _string_, which will render the [[toolbar]] property passed
+     * - `{toolbarContainer}`: _string_, which will render the toolbar container. See [[renderToolbarContainer()]].
      * - `{export}`: _string_, which will render the [[export]] menu button content.
      */
     public $panelTemplate = <<< HTML
@@ -362,6 +369,7 @@ HTML;
      * - `{pager}`: _string_, which will render the grid pagination links.
      * - `{sort}`: _string_, which will render the grid sort links.
      * - `{toolbar}`: _string_, which will render the [[toolbar]] property passed
+     * - `{toolbarContainer}`: _string_, which will render the toolbar container. See [[renderToolbarContainer()]].
      * - `{export}`: _string_, which will render the [[export]] menu button content.
      */
     public $panelHeadingTemplate = <<< HTML
@@ -402,14 +410,11 @@ HTML;
      * - `{sort}`: _string_, which will render the grid sort links.
      * - `{pager}`: _string_, which will render the grid pagination links.
      * - `{toolbar}`: _string_, which will render the [[toolbar]] property passed
+     * - `{toolbarContainer}`: _string_, which will render the toolbar container. See [[renderToolbarContainer()]].
      * - `{export}`: _string_, which will render the [[export]] menu button content
      */
     public $panelBeforeTemplate = <<< HTML
-    <div class="pull-right">
-        <div class="btn-toolbar kv-grid-toolbar" role="toolbar">
-            {toolbar}
-        </div>    
-    </div>
+    {toolbarContainer}
     {before}
     <div class="clearfix"></div>
 HTML;
@@ -423,6 +428,7 @@ HTML;
      * - `{sort}`: _string_, which will render the grid sort links.
      * - `{pager}`: _string_, which will render the grid pagination links.
      * - `{toolbar}`: _string_, which will render the [[toolbar]] property passed
+     * - `{toolbarContainer}`: _string_, which will render the toolbar container. See [[renderToolbarContainer()]].
      * - `{export}`: _string_, which will render the [[export]] menu button content
      */
     public $panelAfterTemplate = '{after}';
@@ -521,6 +527,13 @@ HTML;
         '{toggleData}',
         '{export}',
     ];
+
+    /**
+     * @var array the HTML attributes for the toolbar container. The following special attributes are recognized:
+     *
+     * - `tag`: _string_, the HTML tag to render the toolbar container. Defaults to `div`.
+     */
+    public $toolbarContainerOptions = ['class' => 'btn-toolbar kv-grid-toolbar toolbar-container pull-right'];
 
     /**
      * @var array tags to replace in the rendered layout. Enter this as `$key => $value` pairs, where:
@@ -944,7 +957,7 @@ HTML;
     /**
      * Sets a default css class within `options` if not set
      *
-     * @param array  $options the HTML options
+     * @param array $options the HTML options
      * @param string $css the CSS class to test and append
      */
     protected static function initCss(&$options, $css)
@@ -963,17 +976,6 @@ HTML;
         if (empty($this->options['id'])) {
             $this->options['id'] = $this->getId();
         }
-        if (!$this->toggleData) {
-            parent::init();
-            return;
-        }
-        $this->_toggleDataKey = '_tog' . hash('crc32', $this->options['id']);
-        $this->_isShowAll = ArrayHelper::getValue($_GET, $this->_toggleDataKey, $this->defaultPagination) === 'all';
-        if ($this->_isShowAll) {
-            /** @noinspection PhpUndefinedFieldInspection */
-            $this->dataProvider->pagination = false;
-        }
-        $this->_toggleButtonId = $this->options['id'] . '-togdata-' . ($this->_isShowAll ? 'all' : 'page');
         if (!isset($this->itemLabelSingle)) {
             $this->itemLabelSingle = Yii::t('kvgrid', 'item');
         }
@@ -986,6 +988,24 @@ HTML;
         if (!isset($this->itemLabelMany)) {
             $this->itemLabelMany = Yii::t('kvgrid', 'items-many');
         }
+        if (!$this->toggleData) {
+            parent::init();
+            return;
+        }
+        $this->_toggleDataKey = '_tog' . hash('crc32', $this->options['id']);
+        /**
+         * @var Request $request
+         */
+        $request = $this->_module->get('request', false);
+        if ($request === null || !($request instanceof Request)) {
+            $request = Yii::$app->request;
+        }
+        $this->_isShowAll = $request->getQueryParam($this->_toggleDataKey, $this->defaultPagination) === 'all';
+        if ($this->_isShowAll) {
+            /** @noinspection PhpUndefinedFieldInspection */
+            $this->dataProvider->pagination = false;
+        }
+        $this->_toggleButtonId = $this->options['id'] . '-togdata-' . ($this->_isShowAll ? 'all' : 'page');
         parent::init();
     }
 
@@ -1093,7 +1113,7 @@ HTML;
         if (!isset($this->_module->downloadAction)) {
             $action = ["/{$this->moduleId}/export/download"];
         } else {
-            $action = (array) $this->_module->downloadAction;
+            $action = (array)$this->_module->downloadAction;
         }
         $encoding = ArrayHelper::getValue($this->export, 'encoding', 'utf-8');
         $bom = ArrayHelper::getValue($this->export, 'bom', true);
@@ -1142,14 +1162,14 @@ HTML;
         $itemsAfter = ArrayHelper::getValue($this->export, 'itemsAfter', []);
         $items = ArrayHelper::merge($itemsBefore, $items, $itemsAfter);
         return ButtonDropdown::widget(
-            [
-                'label' => $title,
-                'dropdown' => ['items' => $items, 'encodeLabels' => false, 'options' => $menuOptions],
-                'options' => $options,
-                'containerOptions' => $this->exportContainer,
-                'encodeLabel' => false,
-            ]
-        ) . $form;
+                [
+                    'label' => $title,
+                    'dropdown' => ['items' => $items, 'encodeLabels' => false, 'options' => $menuOptions],
+                    'options' => $options,
+                    'containerOptions' => $this->exportContainer,
+                    'encodeLabel' => false,
+                ]
+            ) . $form;
     }
 
     /**
@@ -1244,35 +1264,38 @@ HTML;
             $page = $pagination->getPage() + 1;
             $pageCount = $pagination->pageCount;
             if (($summaryContent = $this->summary) === null) {
-                return Html::tag($tag, Yii::t('kvgrid', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.', [
-                    'begin' => $begin,
-                    'end' => $end,
-                    'count' => $count,
-                    'totalCount' => $totalCount,
-                    'page' => $page,
-                    'pageCount' => $pageCount,
-                    'item' => $this->itemLabelSingle,
-                    'items' => $this->itemLabelPlural,
-                    'items-few' => $this->itemLabelFew,
-                    'items-many' => $this->itemLabelMany,
-                ]), $summaryOptions);
+                return Html::tag($tag, Yii::t('kvgrid',
+                    'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.',
+                    [
+                        'begin' => $begin,
+                        'end' => $end,
+                        'count' => $count,
+                        'totalCount' => $totalCount,
+                        'page' => $page,
+                        'pageCount' => $pageCount,
+                        'item' => $this->itemLabelSingle,
+                        'items' => $this->itemLabelPlural,
+                        'items-few' => $this->itemLabelFew,
+                        'items-many' => $this->itemLabelMany,
+                    ]), $summaryOptions);
             }
         } else {
             $begin = $page = $pageCount = 1;
             $end = $totalCount = $count;
             if (($summaryContent = $this->summary) === null) {
-                return Html::tag($tag, Yii::t('kvgrid', 'Total <b>{count, number}</b> {count, plural, one{{item}} other{{items}}}.', [
-                    'begin' => $begin,
-                    'end' => $end,
-                    'count' => $count,
-                    'totalCount' => $totalCount,
-                    'page' => $page,
-                    'pageCount' => $pageCount,
-                    'item' => $this->itemLabelSingle,
-                    'items' => $this->itemLabelPlural,
-                    'items-few' => $this->itemLabelFew,
-                    'items-many' => $this->itemLabelMany,
-                ]), $summaryOptions);
+                return Html::tag($tag,
+                    Yii::t('kvgrid', 'Total <b>{count, number}</b> {count, plural, one{{item}} other{{items}}}.', [
+                        'begin' => $begin,
+                        'end' => $end,
+                        'count' => $count,
+                        'totalCount' => $totalCount,
+                        'page' => $page,
+                        'pageCount' => $pageCount,
+                        'item' => $this->itemLabelSingle,
+                        'items' => $this->itemLabelPlural,
+                        'items-few' => $this->itemLabelFew,
+                        'items-many' => $this->itemLabelMany,
+                    ]), $summaryOptions);
             }
         }
 
@@ -1636,30 +1659,32 @@ HTML;
         if ($this->hideResizeMobile) {
             Html::addCssClass($this->options, 'hide-resize');
         }
-        $export = $this->renderExport();
-        $toggleData = $this->renderToggleData();
-        $toolbar = strtr(
-            $this->renderToolbar(),
-            [
-                '{export}' => $export,
-                '{toggleData}' => $toggleData,
-            ]
-        );
-        $replace = ['{toolbar}' => $toolbar];
-        if (strpos($this->layout, '{export}') > 0) {
-            $replace['{export}'] = $export;
-        }
-        if (strpos($this->layout, '{toggleData}') > 0) {
-            $replace['{toggleData}'] = $toggleData;
-        }
-        $this->layout = strtr($this->layout, $replace);
-        $this->layout = str_replace('{items}', Html::tag('div', '{items}', $this->containerOptions), $this->layout);
+        $this->replaceLayoutTokens([
+            '{toolbarContainer}' => $this->renderToolbarContainer(),
+            '{toolbar}' => $this->renderToolbar(),
+            '{export}' => $this->renderExport(),
+            '{toggleData}' =>  $this->renderToggleData(),
+            '{items}' => Html::tag('div', '{items}', $this->containerOptions)
+        ]);
         if (is_array($this->replaceTags) && !empty($this->replaceTags)) {
             foreach ($this->replaceTags as $key => $value) {
                 if ($value instanceof \Closure) {
                     $value = call_user_func($value, $this);
                 }
                 $this->layout = str_replace($key, $value, $this->layout);
+            }
+        }
+    }
+    
+    /**
+     * Replace layout tokens
+     * @param array $pairs the token to find and its replaced value as key value pairs
+     */
+    protected function replaceLayoutTokens($pairs)
+    {
+        foreach ($pairs as $token => $replace) {
+            if (strpos($this->layout, $token) !== false) {
+                $this->layout = str_replace($token, $replace, $this->layout);
             }
         }
     }
@@ -1683,9 +1708,8 @@ HTML;
         }
         $loadingCss = ArrayHelper::getValue($this->pjaxSettings, 'loadingCssClass', 'kv-grid-loading');
         $postPjaxJs = "setTimeout({$this->_gridClientFunc}, 2500);";
-        $pjaxCont = '$("#' .  $this->pjaxSettings['options']['id'] . '")';
+        $pjaxCont = '$("#' . $this->pjaxSettings['options']['id'] . '")';
         if ($loadingCss !== false) {
-            $grid = 'jQuery("#' . $this->containerOptions['id'] . '")';
             if ($loadingCss === true) {
                 $loadingCss = 'kv-grid-loading';
             }
@@ -1800,6 +1824,15 @@ HTML;
     }
 
     /**
+     * Generates the toolbar container with the toolbar
+     */
+    protected function renderToolbarContainer()
+    {
+        $tag = ArrayHelper::remove($this->toolbarContainerOptions, 'tag', 'div');
+        return Html::tag($tag, $this->renderToolbar(), $this->toolbarContainerOptions);
+    }
+
+    /**
      * Generate HTML markup for additional table rows for header and/or footer.
      *
      * @param array|string $data the table rows configuration
@@ -1893,7 +1926,7 @@ HTML;
             $gridOptsVar = 'kvGridExp_' . hash('crc32', $gridOpts);
             $view->registerJs("var {$gridOptsVar}={$gridOpts};", View::POS_HEAD);
             foreach ($this->exportConfig as $format => $setting) {
-                $id = "$('#{$gridId} .export-{$format}')";
+                $id = "jQuery('#{$gridId} .export-{$format}')";
                 $genOpts = Json::encode(
                     [
                         'filename' => $setting['filename'],
@@ -1918,7 +1951,7 @@ HTML;
                 $script .= "{$id}.gridexport({$expOptsVar});";
             }
         }
-        $container = '$("#' . $this->containerOptions['id'] . '")';
+        $container = 'jQuery("#' . $this->containerOptions['id'] . '")';
         if ($this->resizableColumns) {
             $rcDefaults = [];
             if ($this->persistResize) {
@@ -1945,11 +1978,11 @@ HTML;
             }
             $this->floatHeaderOptions = array_replace_recursive($opts, $this->floatHeaderOptions);
             $opts = Json::encode($this->floatHeaderOptions);
-            $script .= "$('#{$gridId} .kv-grid-table:first').floatThead({$opts});";
+            $script .= "jQuery('#{$gridId} .kv-grid-table:first').floatThead({$opts});";
             // integrate resizeableColumns with floatThead
             if ($this->resizableColumns) {
                 $script .= "{$container}.off('{$NS}').on('column:resize{$NS}', function(e){" .
-                    '$("#{$gridId} .kv-grid-table:nth-child(2)").floatThead("reflow");' .
+                      "jQuery('#{$gridId} .kv-grid-table:nth-child(2)').floatThead('reflow');" .
                     '});';
             }
         }
